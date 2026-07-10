@@ -50,8 +50,10 @@ Commit;
 
 5.	Write a query to retrieve the count of employees who have in joined in last 100 days.
 Query
- Select count(*) from Employees e where e.Joining_date> (Current_date-interval 100 Day)
+
+Select count(*) Count from Employees where joining_date>= (Current_date -interval 100 Day)
 ;
+
 Output:
 +-------+
 | Count |
