@@ -1,0 +1,56 @@
+
+SELECT
+    ci.date,
+    ci.resource_id,
+    ci.start_time                                    AS clock_in_time,
+    co.end_time                                      AS clock_out_time,
+    ROUND(
+        (julianday(co.end_time) - julianday(ci.start_time)) * 24, 2
+    )                                                AS total_hours
+FROM test_de ci
+INNER JOIN test_de co
+    ON  ci.resource_id = co.resource_id
+    AND ci.date        = co.date
+    AND co.is_clock_out = 1
+    AND co.end_time    != '2000-01-01 00:00:00'
+WHERE ci.is_clock_in  = 1
+  AND ci.start_time   != '2000-01-01 00:00:00'
+ORDER BY ci.date, ci.resource_id;
+
+
+SELECT date, resource_id, start_time, is_clock_in
+FROM test_de
+WHERE is_clock_in = 1
+LIMIT 10;
+
+
+SELECT date, resource_id, end_time, is_clock_out
+FROM test_de
+WHERE is_clock_out = 1
+LIMIT 10;
+
+SELECT date, resource_id,
+    SUM(is_clock_in)  AS total_clock_ins,
+    SUM(is_clock_out) AS total_clock_outs
+FROM test_de
+GROUP BY date, resource_id
+HAVING SUM(is_clock_in) > 0 AND SUM(is_clock_out) > 0
+LIMIT 10;
+
+
+SELECT
+    date,
+    resource_id,
+    MIN(CASE WHEN is_clock_in = 1  THEN start_time END)  AS clock_in_time,
+    MAX(CASE WHEN is_clock_out = 1 THEN end_time END)    AS clock_out_time,
+    ROUND(
+        (julianday(MAX(CASE WHEN is_clock_out = 1 THEN end_time END)) - 
+         julianday(MIN(CASE WHEN is_clock_in = 1  THEN start_time END))) * 24, 2
+    )                                                    AS total_hours
+FROM test_de
+WHERE start_time IS NOT NULL
+  AND end_time IS NOT NULL
+GROUP BY date, resource_id
+HAVING MIN(CASE WHEN is_clock_in = 1  THEN start_time END) IS NOT NULL
+   AND MAX(CASE WHEN is_clock_out = 1 THEN end_time END)   IS NOT NULL
+ORDER BY date, resource_id;
