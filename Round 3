@@ -1,0 +1,17 @@
+
+1: the query that you see is very very slow. what can i do
+Approach:
+•	First check the execution plan if it is full scan or not, index or working or not with the help of explain (execution plan).
+•	Avoid data type conversion on created_at as when we use function on column which we created index, then it will prevent to run index on that which will result in slowness of query.
+•	We can create composite index on client_id, country instead client_id, created_at as this will work much faster as compared to initial composite index created. There is no data type conversion on these columns neither any functions are used here.
+•	The filter is applied on timestamp column but comparing the date which is not right as timestamp and date are different data type.
+
+2: We need to delete 500 million rows older than 90 days from a MySQL table. What is the safest way?
+
+•	First we need to check the total volume or rows which are older than 90 days to understand how much rows or data will get affected(deleted from table).
+•	check if there are partitions created on table or not on date columns.
+•	If there is partition on date column, it will be easier and much faster to drop those partition which older than 90 days as compared to deleting the records.
+•	And note the total rows get affected.
+•	Also before deleting the data from production directly first check if the same in testing or development phase first it the queries or actually deleting the only required rows.
+•	Once confirmed then only delete the rows from production while checking the count first if the rows deleted should match with expected numbers which we check initially before committing.
+•	If there is any backup for table it would be better for safer side.
